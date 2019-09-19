@@ -1,0 +1,17 @@
+main() : void
+begin
+    int B;
+    int i
+
+    B = 7
+    i = 3
+    if( i ** 2 .lt. B )
+    begin
+	printInt(i ** 2)
+    end
+    else
+    begin
+	printInt(B ** 3)
+    end
+    printLine()
+end

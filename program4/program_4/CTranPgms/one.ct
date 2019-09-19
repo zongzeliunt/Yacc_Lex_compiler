@@ -1,0 +1,8 @@
+main() : void
+begin
+    int x
+    x = 3
+    printInt(x)
+    printInt(70)
+    printLine()
+end

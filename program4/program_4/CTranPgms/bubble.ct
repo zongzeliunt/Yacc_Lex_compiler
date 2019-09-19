@@ -1,0 +1,34 @@
+int X[1000]
+
+main() : void
+begin
+    int i
+
+
+	printString("Some of the original values are:\n")
+        printInt(X[111])
+	printString(" ")
+        printInt(X[222])
+	printString(" ")
+        printInt(X[333])
+	printString(" ")
+        printInt(X[666])
+	printString(" ")
+        printInt(X[777])
+	printString(" ")
+        printInt(X[999])
+        printLine()
+
+    printLine()
+    printLine()
+    printLine()
+
+    sort(999)
+    
+end
+
+
+sort(n) : void
+    int n
+begin
+end

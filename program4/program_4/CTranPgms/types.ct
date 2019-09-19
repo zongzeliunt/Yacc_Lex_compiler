@@ -1,0 +1,24 @@
+    int  array[25];
+    boolean george;
+    int x;
+    int result;
+    char c;
+    int i
+
+main() : void
+begin
+    array[7] = 21
+    c = 45
+    george = true
+    i = 2
+    x = 19
+    result = array[21]
+    printInt(result)
+    printLine() 
+    printInt(i)
+    printLine() 
+    printInt(x)
+    printLine() 
+    printChar(c)
+    printLine() 
+end

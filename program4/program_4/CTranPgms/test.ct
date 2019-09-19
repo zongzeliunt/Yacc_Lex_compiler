@@ -1,0 +1,17 @@
+main() : void
+begin
+    int x;
+    int y;
+    int z;
+    int n 
+    printString("The solution for 4 disks is:")
+    printLine()
+end
+hanoi(x,y,z,n) : void
+    int x;
+    int y;
+    int z;
+    int n 
+begin
+end
+

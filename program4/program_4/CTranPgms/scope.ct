@@ -1,0 +1,31 @@
+int x;
+int A
+
+main() : void
+begin
+    int x
+    x = 3
+    A = 17
+    printInt(x)
+    printString(" ")
+    printInt(A)
+    printLine()
+    if( 1 .le. 1 )
+    begin
+        int x
+        x = 1
+        printInt(x)
+        printString(" ")
+        printInt(A)
+        printLine()
+    end
+    if( 2 .eq. 2 )
+    begin
+        int A
+        A = 4
+        printInt(x)
+        printString(" ")
+        printInt(A)
+        printLine()
+    end
+end

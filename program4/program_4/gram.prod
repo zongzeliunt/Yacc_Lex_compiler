@@ -1,0 +1,496 @@
+%start statement_list
+%%
+
+statement_list : statement
+	| statement_list statement
+	;
+
+statement: 
+	var ASG expr
+		{
+			var_asg_expr();
+		}
+	| for_loop_begin 
+		{
+
+		}
+	| for_loop_finish 
+		{
+
+		}
+	| dec_var 
+		{
+		}
+	| return_call
+		{
+			string tmp = func_call_stack.pop();
+			print_step (tmp);
+		}
+	| func_call
+		{
+			string tmp = func_call_stack.pop();
+			print_step (tmp);
+		}
+	| ID '(' ')' ':' DEC_TYPE
+		{
+			if_else_func_stack.push("func");
+			func_name_stack.push($1->s);
+			func_name_variable_list.insert($1->s);
+			func_name_variable_list.insert("0");
+		}
+	| ID '(' var_list ')' ':' DEC_TYPE 
+		{
+			if_else_func_stack.push("func");
+			int variable_count = 0;
+			list func_variable_tmp_list;
+			while (!var_list_list.is_empty()) {
+				string id = var_list_list.pop();
+				string range = var_list_list.pop();
+				string var_name = $1->s; // func_name
+				var_name += "_";
+				var_name += id;
+				func_variable_tmp_list.insert(var_name);
+				func_variable_tmp_list.insert(range);
+				variable_count ++;
+			}
+			func_name_stack.push($1->s);
+			func_name_variable_list.insert($1->s);
+			func_name_variable_list.insert(int_to_string(variable_count));
+			while (!func_variable_tmp_list.is_empty()) {
+				string id = func_variable_tmp_list.pop();
+				string range = func_variable_tmp_list.pop();
+				func_name_variable_list.insert(id);
+				func_name_variable_list.insert(range);
+			}
+		}
+	| IF '(' if_condition_list ')' 
+		{
+			if_else_func_stack.push("if");
+			//this switch is only for the start symbol, only use for once.
+		}
+	| ELSE {
+			if_else_func_stack.push("else");
+		}
+	| START
+		{
+			string if_else_func_switch = if_else_func_stack.pop();
+			if (if_else_func_switch == "if") {
+				if_start(0);
+			}
+			if (if_else_func_switch == "else") {
+				if_start(1);
+			}
+			if (if_else_func_switch == "func") {
+				func_start();
+			}
+			if_else_func_stack.push (if_else_func_switch);
+		}
+	| END
+		{
+			string if_else_func_switch = if_else_func_stack.pop();
+			if (if_else_func_switch == "if") {
+				if_else_finish(0);
+			}
+			if (if_else_func_switch == "else") {
+				if_else_finish(1);
+			}
+			if (if_else_func_switch == "func") {
+				func_finish();
+			}
+		}
+	;
+
+return_call:
+//{{{
+	RETURN '('var_list')' 
+		{
+			return_call_gen();
+		}
+	| RETURN var_list 
+		{
+			return_call_gen();
+		}
+//}}}
+
+func_call:
+//{{{
+	ID '(' var_list ')' 
+		{
+			list func_call_variable_list;
+			int count = 0;
+			while (!var_list_list.is_empty()) {
+				string id = var_list_list.pop();
+				string range = var_list_list.pop();
+				func_call_variable_list.insert(id);
+				func_call_variable_list.insert(range);
+				count ++;
+			}
+			string func_total_string = func_call_gen($1->s, func_call_variable_list, count);
+			func_call_stack.push(func_total_string);
+		}
+	| ID '(' ')' 
+		{
+			string 	func_total_string = get_real_func_name($1->s);
+			func_total_string += "();";
+			func_call_stack.push(func_total_string);
+		}
+	| ID '(' STRING ')' 
+		{
+			string 	func_total_string = get_real_func_name($1->s);
+			func_total_string += "(";
+			func_total_string += $3->s;
+			func_total_string += ");";
+			func_call_stack.push(func_total_string);
+		}
+	;
+//}}}
+
+if_condition_list :
+//{{{
+	if_condition 
+		{
+		}
+	| if_condition_list AND if_condition_list 
+		{
+			if_and();
+		}
+	| if_condition_list OR if_condition_list 
+		{
+			if_or();
+		}
+	;
+if_condition :
+	var JUDGE_OPT var 
+		{
+			string id = var_under_opt_stack.pop();
+			string addr = var_under_opt_stack.pop();
+			string var_2 = get_id_real_globalarray_position (id, addr);
+
+			id = var_under_opt_stack.pop();
+			addr = var_under_opt_stack.pop();
+			string var_1 = get_id_real_globalarray_position (id, addr);
+			string opt = $2->s;
+			if_step_opt (var_1, var_2, opt);	
+		}
+	| var JUDGE_OPT expr 
+		{
+			string id = var_under_opt_stack.pop();
+			string addr = var_under_opt_stack.pop();
+			string var_1 = get_id_real_globalarray_position (id, addr);
+			string var_2 = global_value_stack.pop();
+			string opt = $2->s;
+			if_step_opt (var_1, var_2, opt);	
+			
+		
+		}
+	| expr JUDGE_OPT var
+		{
+			string var_1 = global_value_stack.pop();
+			
+			string id = var_under_opt_stack.pop();
+			string addr = var_under_opt_stack.pop();
+			string var_2 = get_id_real_globalarray_position (id, addr);
+			string opt = $2->s;
+			if_step_opt (var_1, var_2, opt);	
+		}
+	| expr JUDGE_OPT expr 
+		{
+			string var_2 = global_value_stack.pop();
+			string var_1 = global_value_stack.pop();
+			string opt = $2->s;
+			if_step_opt (var_1, var_2, opt);	
+		}
+	
+	;
+//}}}
+
+for_loop_begin:
+//{{{
+	DO INTEGER var ASG var_list 
+		{
+			list do_loop_list;
+			int value_count = 0;
+			string loop_start;
+			string loop_finish;
+			string loop_step = "1";
+			string id ;
+			string range;
+			
+			while (!var_list_list.is_empty()) {
+				id = var_list_list.pop();
+				range = var_list_list.pop();
+				if (range != "-1") {
+					id = get_id_real_globalarray_position (id, range); 
+				}
+				if (value_count == 0) {
+					loop_start = id;
+				}	
+				if (value_count == 1) {
+					loop_finish = id;
+				}	
+				if (value_count == 2) {
+					loop_step = id;
+				}	
+				value_count ++;
+			}	
+
+			id = var_under_opt_stack.pop();
+			range = var_under_opt_stack.pop();
+			string loop_name = int_to_string ($2);
+			
+			string loop_index = get_var_name_with_func(id);
+			if (loop_index == "") {
+				//declare a new one
+				string var_name = id;
+				string type = "int";
+				if (!func_name_stack.is_empty() ) {
+					string func_name = func_name_stack.pop();
+					func_name_stack.push(func_name);
+					var_name = func_name;
+					var_name += "_";
+					var_name += id;
+				}
+				id_array_declare (var_name, type, range);
+				loop_index = var_name;
+			}
+
+			loop_begin (loop_name, loop_index, loop_start, loop_finish, loop_step);
+		}
+	;
+
+for_loop_finish:
+	INTEGER DO_END
+		{
+			string loop_name = int_to_string ($1);
+			loop_end (loop_name);	
+		}
+	;
+//}}}
+
+var:
+//{{{
+	ID
+		{
+			var_under_opt_stack.push("0");
+			string var_name = get_var_name_with_func($1->s);
+			if (var_name == "") {
+				var_name = $1->s;
+			}
+			var_under_opt_stack.push(var_name);
+			//push range first, var name second
+				
+		}
+	| ID '[' var_list ']'
+		{
+			string total_string = "";
+			stack subset_stack;
+			while (!var_list_list.is_empty()) {
+				string id = var_list_list.pop();
+				string range = var_list_list.pop();
+				subset_stack.push(id);
+			}	
+			while (!subset_stack.is_empty()) {
+				total_string += subset_stack.pop();
+				total_string += " ";
+			}
+			var_under_opt_stack.push(total_string);
+			string var_name = get_var_name_with_func($1->s);
+			if (var_name == "") {
+				var_name = $1->s;
+			}
+			var_under_opt_stack.push(var_name);
+		}	
+	;
+//}}}
+
+dec_var:
+//{{{
+	DEC_TYPE dec_var_list
+		{
+			string type($1->s);
+			while (!need_declare_stack.is_empty()) {
+				string id = need_declare_stack.pop();
+				string range = need_declare_stack.pop();
+				string var_name = id;
+				if (!func_name_stack.is_empty() ) {
+					string func_name = func_name_stack.pop();
+					func_name_stack.push(func_name);
+					var_name = func_name;
+					var_name += "_";
+					var_name += id;
+				}
+				id_array_declare (var_name, type, range);
+			}
+		}
+	| DEC_TYPE dec_var_list ';' 
+		{
+			string type($1->s);
+			while (!need_declare_stack.is_empty()) {
+				string id = need_declare_stack.pop();
+				string range = need_declare_stack.pop();
+				string var_name = id;
+				if (!func_name_stack.is_empty() ) {
+					string func_name = func_name_stack.pop();
+					func_name_stack.push(func_name);
+					var_name = func_name;
+					var_name += "_";
+					var_name += id;
+				}
+				id_array_declare (var_name, type, range);
+			}
+		}
+	;
+//}}}	
+
+dec_var_list:
+//{{{
+	var
+		{
+			string id = var_under_opt_stack.pop();
+			string range = var_under_opt_stack.pop();
+			need_declare_stack.push(range);
+			need_declare_stack.push(id);
+		}
+	| var ',' dec_var_list
+		{
+			string id = var_under_opt_stack.pop();
+			string range = var_under_opt_stack.pop();
+			need_declare_stack.push(range);
+			need_declare_stack.push(id);
+		}
+	;
+
+//}}}
+
+var_list:
+//{{{
+	expr 	{
+			string expr_reg = global_value_stack.pop();
+			var_list_list.insert(expr_reg);
+			var_list_list.insert("-1");
+		}
+	| var
+		{
+			string id = var_under_opt_stack.pop();
+			string range = var_under_opt_stack.pop();
+			var_list_list.insert(id);
+			var_list_list.insert(range);
+			
+		}
+	| INTEGER
+		{
+			var_list_list.insert(int_to_string($1));
+			var_list_list.insert("-1");
+			if (var_list_list.is_empty()) {
+				var_list_list.insert(int_to_string($1));
+				var_list_list.insert("-1");
+			}
+		}
+	| var_list ',' var
+		{
+			string id = var_under_opt_stack.pop();
+			string range = var_under_opt_stack.pop();
+			var_list_list.insert(id);
+			var_list_list.insert(range);
+		}
+	| var_list ','  INTEGER
+		{
+			var_list_list.insert(int_to_string($3));
+			var_list_list.insert("-1");
+		}
+	| var_list ','  expr 
+		{
+			string expr_reg = global_value_stack.pop();
+			var_list_list.insert(expr_reg);
+			var_list_list.insert("-1");
+		}
+	;
+//}}}
+
+expr:
+//{{{
+	func_call 
+		{
+			string func_result = func_call_stack.pop();
+			print_step (func_result);
+			string tmp_variable = gen_value_tmp();
+			string total_string = tmp_variable;
+			total_string += " = r0;";
+			print_step (total_string);	
+			global_value_stack.push(tmp_variable);
+		}
+	| var
+		{
+			var_asg_var();
+		}
+ 	| INTEGER 
+		{
+			string num_tmp_string = int_to_string($1);
+			global_value_stack.push(num_tmp_string);
+		}
+	| expr '+' expr  
+		{
+			step_operation ("+");
+		}
+	| expr '/' expr 
+		{
+			step_operation ("/");
+		}
+	| expr '*' expr 
+		{
+			step_operation ("*");
+		}
+	| expr '-' expr 
+		{
+			step_operation ("-");
+		}
+	| expr '&' expr 
+		{
+			step_operation ("&");
+		}
+	| expr '|' expr 
+		{
+			step_operation ("|");
+		}
+	| expr '^' expr 
+		{
+			step_operation ("^");
+		}
+	| expr '%' expr 
+		{
+			step_operation ("%");
+		}
+	| expr '<''<' expr 
+		{
+			step_operation ("<<");
+		}
+	| expr '>''>' expr 
+		{
+			step_operation (">>");
+		}
+	| expr EXP expr 
+		{
+			exponentiation_operation();
+		}
+	| '(' expr ')' 
+		{
+			$$ = $2; 
+		}
+	| '&' expr 
+		{
+			get_address();
+		}
+	| '~' expr 
+		{
+			get_reverse();
+		}
+	;
+//}}}
+ 
+%%
+
+
+
+void yyerror(char *s) {
+ fprintf(stderr, "error! %s\n", s);
+}

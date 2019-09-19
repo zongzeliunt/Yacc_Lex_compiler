@@ -1,0 +1,10 @@
+main() : void
+begin
+    int i
+
+    do 100 i = 3, 7
+        printInt(i)
+        printString(" ")
+100 continue    
+    printLine()
+end

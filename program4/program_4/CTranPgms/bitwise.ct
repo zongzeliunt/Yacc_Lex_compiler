@@ -1,0 +1,45 @@
+    unsigned  array[10];
+    boolean george;
+    int element;
+    unsigned mask;
+    int word;
+    int bit
+
+main() : void
+begin
+    printString("Please enter non-negative integer values")
+    printLine()
+    do 100 i = 1, 100, 1
+	readInt(&element)
+        word = element / 1024
+        bit = element % 1024
+        mask = 1 << bit
+        array[word] = array[word]  | mask
+100 continue
+    do 200 word = 0, 9, 1
+        printString("Word ")
+        printInt(word)
+        printString(" = ")
+        printHex(array[word])
+        printLine()
+200 continue
+        array[3] = array[3] & array[5]  
+        printString("The bitwise AND of array[3] and array[5] = ")
+        printHex(array[3])
+        printLine()
+
+        array[4] = array[4] | array[6]  
+        printString("The bitwise OR of array[4] and array[6] = ")
+        printHex(array[4])
+        printLine()
+
+        array[2] =  array[2] ^ array[7]  
+        printString("The bitwise XOR of array[2] and array[7] = ")
+        printHex(array[2])
+        printLine()
+    
+        array[1] = ~ array[8]  
+        printString("The 1s complement of array[1] = ")
+        printHex(array[1])
+        printLine()
+end

@@ -1,0 +1,5 @@
+
+main() : void
+begin
+    printString("The solution for 5 disks is:")
+end

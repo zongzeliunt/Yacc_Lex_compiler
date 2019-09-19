@@ -1,0 +1,11 @@
+main() : void
+begin
+    int i;
+    int j
+    i = 177
+    j = 31
+    i = i %  j
+    printInt(i)
+    printLine()
+end
+

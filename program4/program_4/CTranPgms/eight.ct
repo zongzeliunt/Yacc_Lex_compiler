@@ -1,0 +1,7 @@
+main() : void
+begin
+    int x
+    x = (2 ** 3)  ** 2 
+    printInt(x)
+    printLine()
+end

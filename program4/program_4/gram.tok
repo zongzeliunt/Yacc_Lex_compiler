@@ -1,0 +1,54 @@
+%{
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <iostream>
+ #include "APIs.h"
+#include <fstream>
+
+using namespace std;
+
+int yylex(void);
+void yyerror(char *);
+
+%}
+%union
+{	
+	int num;
+	char *string;
+	SymbolTableElement symbol;
+}
+
+%token ASG 
+%token DO 
+%token DO_END 
+%token IF 
+%token ELSE 
+%token OR
+%token RETURN 
+%token <symbol> DEC_TYPE 
+%token <symbol> JUDGE_OPT 
+%token <num> INTEGER
+%token <symbol> STRING 
+%token <symbol> ID
+
+%token START 
+%token END
+%token OUTPUT
+%token EXP 
+
+%left '-' '+'
+%left '*' '/' '%'
+%left EXP
+%left '~' '&' '|' '^'
+
+%left OR
+%left AND
+
+%type <string> expr
+%type <string> var 
+%type <string> dec_var
+%type <string> statement
+
+
+

@@ -1,0 +1,3 @@
+You are to implement functions and function calls in CTran. Use the activation record conventions discussed in class. You'll need to support definitions of functions and calls to functions, both with and without parameters.
+
+In addition, though you should have been including this in your implementation all along, you'll need to support multiple nested scopes. Basically, the CTran scoping rules will be the same as C. Whenever you encounter a '{' you enter a new scope. Whenever you encounter a '}', you exit a scope
